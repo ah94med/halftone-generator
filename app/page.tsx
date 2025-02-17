@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Upload, Download, ImageIcon } from "lucide-react"
+import { Upload, Download, ImageIcon, Copy } from "lucide-react"
 import ImageProcessor from "@/components/image-processor"
 import ControlPanel from "@/components/control-panel"
 import { debounce } from "@/lib/debounce"
@@ -58,6 +58,20 @@ export default function HalftoneConverter() {
     }
   }
 
+  const copySVGCode = async () => {
+    if (!canvasRef.current) return
+    const svgData = canvasRef.current.getAttribute("data-svg")
+    if (svgData) {
+      try {
+        await navigator.clipboard.writeText(svgData)
+        alert('SVG code copied to clipboard!') // Consider using a toast notification instead
+      } catch (err) {
+        console.error('Failed to copy SVG code:', err)
+        alert('Failed to copy SVG code')
+      }
+    }
+  }
+
   const downloadPNG = () => {
     if (!canvasRef.current) return
     const link = document.createElement("a")
@@ -107,6 +121,10 @@ export default function HalftoneConverter() {
               <Button onClick={downloadSVG}>
                 <Download className="w-4 h-4 mr-2" />
                 Download SVG
+              </Button>
+              <Button onClick={copySVGCode} variant="outline">
+                <Copy className="w-4 h-4 mr-2" />
+                Copy SVG Code
               </Button>
             </div>
           )}
