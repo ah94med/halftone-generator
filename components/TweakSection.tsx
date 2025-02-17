@@ -1,12 +1,11 @@
 'use client';
 
-import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff } from 'lucide-react';
 
 interface TweakSectionProps {
   uploadedFiles: File[];
   groupIds: string[];
-  visibility?: boolean[];
+  visibility: boolean[];
   onGroupIdChange: (index: number, groupId: string) => void;
   onVisibilityChange: (index: number, isVisible: boolean) => void;
 }
@@ -14,7 +13,7 @@ interface TweakSectionProps {
 export const TweakSection = ({
   uploadedFiles,
   groupIds,
-  visibility = [],
+  visibility,
   onGroupIdChange,
   onVisibilityChange,
 }: TweakSectionProps) => {
@@ -32,12 +31,16 @@ export const TweakSection = ({
               className="text-sm border rounded px-2 py-1 w-32"
               placeholder="Group ID"
             />
-            <Checkbox
-              checked={visibility[index] || false}
-              onCheckedChange={(checked) => onVisibilityChange(index, !!checked)}
-              className="ml-2"
-            />
-            {visibility[index] ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            <button
+              onClick={() => onVisibilityChange(index, !visibility[index])}
+              className="p-1 hover:bg-gray-100 rounded"
+            >
+              {visibility[index] ? (
+                <Eye className="w-4 h-4 text-gray-700" />
+              ) : (
+                <EyeOff className="w-4 h-4 text-gray-500" />
+              )}
+            </button>
           </div>
         ))}
       </div>
