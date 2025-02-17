@@ -76,7 +76,7 @@ const processImage = (imageData: ImageData, settings: Settings) => {
 
   // Create new array for processed data
   const processedData = new Uint8ClampedArray(data.length)
-  const svgElements: string[] = []
+  let pathData = '' // Store all diamond paths here
 
   // Process image data
   for (let y = 0; y < height; y += gridSize) {
@@ -117,20 +117,13 @@ const processImage = (imageData: ImageData, settings: Settings) => {
           finalSize *= randomFactor
         }
 
-        // Add diamond to SVG elements
+        // Add diamond to path data
         const centerX = x + gridSize / 2
         const centerY = y + gridSize / 2
+        const halfSize = finalSize / 2
 
-        svgElements.push(`
-          <rect
-            x="${centerX - finalSize / 2}"
-            y="${centerY - finalSize / 2}"
-            width="${finalSize}"
-            height="${finalSize}"
-            transform="rotate(45 ${centerX} ${centerY})"
-            fill="#0000FF"
-          />
-        `)
+        // Diamond path: M (start), L (line to), Z (close path)
+        pathData += `M${centerX - halfSize},${centerY} L${centerX},${centerY - halfSize} L${centerX + halfSize},${centerY} L${centerX},${centerY + halfSize} Z `
 
         // Draw preview on canvas
         for (let dy = 0; dy < gridSize && y + dy < height; dy++) {
@@ -158,10 +151,10 @@ const processImage = (imageData: ImageData, settings: Settings) => {
     }
   }
 
-  // Generate SVG document
+  // Generate SVG document with a single <path> element
   const svgData = `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-      ${svgElements.join("\n")}
+      <path d="${pathData.trim()}" fill="#0000FF" />
     </svg>
   `
 
