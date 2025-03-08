@@ -70,6 +70,25 @@ const getGradientFactor = (
 //   return (valueA + valueB) / 2
 // }
 
+const generateDetailedSVG = (shapes: Array<{ x: number, y: number, size: number }>, width: number, height: number): string => {
+  const svgElements = shapes.map(shape => `
+    <rect
+      x="${shape.x - shape.size / 2}"
+      y="${shape.y - shape.size / 2}"
+      width="${shape.size}"
+      height="${shape.size}"
+      transform="rotate(45 ${shape.x} ${shape.y})"
+      fill="#0000FF"
+    />
+  `);
+
+  return `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+      ${svgElements.join("\n")}
+    </svg>
+  `;
+};
+
 const processImage = (imageData: ImageData, settings: Settings) => {
   const { width, height, data } = imageData
   const { gridSize, dotSize, brightness, contrast, threshold, gradientStrength, gradientDirection, sizeRandomization } = settings
@@ -77,6 +96,7 @@ const processImage = (imageData: ImageData, settings: Settings) => {
   // Create new array for processed data
   const processedData = new Uint8ClampedArray(data.length)
   let pathData = '' // Store all diamond paths here
+  const shapes: Array<{ x: number, y: number, size: number }> = []
 
   // Process image data
   for (let y = 0; y < height; y += gridSize) {
@@ -125,6 +145,12 @@ const processImage = (imageData: ImageData, settings: Settings) => {
         // Diamond path: M (start), L (line to), Z (close path)
         pathData += `M${centerX - halfSize},${centerY} L${centerX},${centerY - halfSize} L${centerX + halfSize},${centerY} L${centerX},${centerY + halfSize} Z `
 
+        shapes.push({
+          x: centerX,
+          y: centerY,
+          size: finalSize
+        });
+
         // Draw preview on canvas
         for (let dy = 0; dy < gridSize && y + dy < height; dy++) {
           for (let dx = 0; dx < gridSize && x + dx < width; dx++) {
@@ -151,16 +177,18 @@ const processImage = (imageData: ImageData, settings: Settings) => {
     }
   }
 
-  // Generate SVG document with a single <path> element
-  const svgData = `
+  const singlePathSVG = `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
       <path d="${pathData.trim()}" fill="#0000FF" />
     </svg>
-  `
+  `;
+
+  const detailedSVG = generateDetailedSVG(shapes, width, height);
 
   return {
     processedImageData: new ImageData(processedData, width, height),
-    svgData,
+    svgData: singlePathSVG,
+    detailedSvgData: detailedSVG
   }
 }
 

@@ -1,4 +1,11 @@
-export const mergeSVGs = (svgs: string[], groupIds: string[], visibility: boolean[]): string => {
+export const mergeSVGs = (
+  svgs: string[],
+  groupIds: string[],
+  visibility: boolean[],
+  scales: number[],
+  xPositions: number[],
+  yPositions: number[]
+): string => {
   const parser = new DOMParser();
   const mergedSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   mergedSVG.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -27,7 +34,10 @@ export const mergeSVGs = (svgs: string[], groupIds: string[], visibility: boolea
       // Create a group for the SVG and position it
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       group.setAttribute('id', groupIds[index]); // Use custom group ID
-      group.setAttribute('transform', `translate(${x}, ${y}) scale(${scale})`);
+      group.setAttribute(
+        'transform',
+        `translate(${xPositions[index]}, ${yPositions[index]}) scale(${scales[index]})`
+      );
 
       // Set visibility based on the checkbox
       if (!visibility[index]) {

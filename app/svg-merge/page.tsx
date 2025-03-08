@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { UploadSection } from '@/components/UploadSection';
 import { TweakSection } from '@/components/TweakSection';
 import { PreviewSection } from '@/components/PreviewSection';
@@ -11,74 +11,76 @@ export default function SvgMergePage() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [groupIds, setGroupIds] = useState<string[]>([]);
   const [visibility, setVisibility] = useState<boolean[]>([]);
+  const [scales, setScales] = useState<number[]>([]); // Scale for each SVG
+  const [xPositions, setXPositions] = useState<number[]>([]); // X position for each SVG
+  const [yPositions, setYPositions] = useState<number[]>([]); // Y position for each SVG
   const [svgData, setSvgData] = useState<string>('');
   const previewRef = useRef<HTMLDivElement>(null);
-
-  // Helper function to re-merge SVGs
-  const remergeSVGs = async (files: File[] = uploadedFiles) => {
-    if (files.length === 0) {
-      setSvgData('');
-      return;
-    }
-    try {
-      const svgStrings = await Promise.all(files.map((file) => file.text()));
-      const merged = mergeSVGs(svgStrings, groupIds, visibility);
-      setSvgData(merged);
-    } catch (error) {
-      console.error('Error merging SVGs:', error);
-      setSvgData('');
-    }
-  };
 
   const handleUpload = async (files: File[]) => {
     const newFiles = [...uploadedFiles, ...files];
     const newGroupIds = [...groupIds, ...files.map((_, i) => `svg-group-${groupIds.length + i}`)];
     const newVisibility = [...visibility, ...files.map(() => true)];
+    const newScales = [...scales, ...files.map(() => 1)];
+    const newXPositions = [...xPositions, ...files.map(() => 0)];
+    const newYPositions = [...yPositions, ...files.map(() => 0)];
     
+    // Read all files first
+    const svgStrings = await Promise.all(newFiles.map((file) => file.text()));
+    
+    // Update state in a single batch
     setUploadedFiles(newFiles);
     setGroupIds(newGroupIds);
     setVisibility(newVisibility);
+    setScales(newScales);
+    setXPositions(newXPositions);
+    setYPositions(newYPositions);
     
-    // Immediately remerge with the new files
-    await remergeSVGs(newFiles);
+    // Merge SVGs after state updates
+    const mergedSVG = mergeSVGs(svgStrings, newGroupIds, newVisibility, newScales, newXPositions, newYPositions);
+    setSvgData(mergedSVG);
   };
+
+  // Create a generic update handler
+  const createUpdateHandler = <T,>(
+    setter: React.Dispatch<React.SetStateAction<T[]>>,
+    key: keyof typeof state
+  ) => (index: number, value: T) => {
+    setter(prev => {
+      const newValues = [...prev];
+      newValues[index] = value;
+      
+      // Update the SVG data after state change
+      const svgStrings = uploadedFiles.map(file => file.text());
+      const mergedSVG = mergeSVGs(svgStrings, groupIds, visibility, scales, xPositions, yPositions);
+      setSvgData(mergedSVG);
+      
+      return newValues;
+    });
+  };
+
+  // Use the generic handler for all properties
+  const handleGroupIdChange = createUpdateHandler(setGroupIds, 'groupIds');
+  const handleVisibilityChange = createUpdateHandler(setVisibility, 'visibility');
+  const handleScaleChange = createUpdateHandler(setScales, 'scales');
+  const handleXPositionChange = createUpdateHandler(setXPositions, 'xPositions');
+  const handleYPositionChange = createUpdateHandler(setYPositions, 'yPositions');
 
   const handleRemove = async (index: number) => {
     const newFiles = uploadedFiles.filter((_, i) => i !== index);
     const newGroupIds = groupIds.filter((_, i) => i !== index);
     const newVisibility = visibility.filter((_, i) => i !== index);
+    const newScales = scales.filter((_, i) => i !== index);
+    const newXPositions = xPositions.filter((_, i) => i !== index);
+    const newYPositions = yPositions.filter((_, i) => i !== index);
     setUploadedFiles(newFiles);
     setGroupIds(newGroupIds);
     setVisibility(newVisibility);
-    await remergeSVGs();
+    setScales(newScales);
+    setXPositions(newXPositions);
+    setYPositions(newYPositions);
+    setSvgData(mergeSVGs(newFiles.map((file) => file.text()), newGroupIds, newVisibility, newScales, newXPositions, newYPositions));
   };
-
-  const handleGroupIdChange = async (index: number, groupId: string) => {
-    const newGroupIds = [...groupIds];
-    newGroupIds[index] = groupId;
-    setGroupIds(newGroupIds);
-    await remergeSVGs();
-  };
-
-  const handleVisibilityChange = async (index: number, isVisible: boolean) => {
-    const newVisibility = [...visibility];
-    newVisibility[index] = isVisible;
-    setVisibility(newVisibility);
-    await remergeSVGs();
-  };
-
-  useEffect(() => {
-    if (previewRef.current && svgData) {
-      previewRef.current.innerHTML = svgData;
-    }
-  }, [svgData]);
-
-  // Add this effect to remerge when groupIds or visibility change
-  useEffect(() => {
-    if (uploadedFiles.length > 0) {
-      remergeSVGs();
-    }
-  }, [groupIds, visibility]);
 
   return (
     <div>
@@ -91,8 +93,14 @@ export default function SvgMergePage() {
               uploadedFiles={uploadedFiles}
               groupIds={groupIds}
               visibility={visibility}
+              scales={scales}
+              xPositions={xPositions}
+              yPositions={yPositions}
               onGroupIdChange={handleGroupIdChange}
               onVisibilityChange={handleVisibilityChange}
+              onScaleChange={handleScaleChange}
+              onXPositionChange={handleXPositionChange}
+              onYPositionChange={handleYPositionChange}
             />
           )}
           <PreviewSection svgData={svgData} ref={previewRef} />

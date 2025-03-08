@@ -18,9 +18,10 @@ interface ImageProcessorProps {
       right: number
     }
   }
+  onDetailedSvgData?: (data: string) => void
 }
 
-const ImageProcessor = forwardRef<HTMLCanvasElement, ImageProcessorProps>(({ image, settings }, ref) => {
+const ImageProcessor = forwardRef<HTMLCanvasElement, ImageProcessorProps>(({ image, settings, onDetailedSvgData }, ref) => {
   const workerRef = useRef<Worker>()
 
   useEffect(() => {
@@ -63,14 +64,18 @@ const ImageProcessor = forwardRef<HTMLCanvasElement, ImageProcessorProps>(({ ima
 
       // Handle processed data from worker
       workerRef.current!.onmessage = (e) => {
-        const { processedImageData, svgData } = e.data
+        const { processedImageData, svgData, detailedSvgData } = e.data
         ctx.putImageData(processedImageData, 0, 0)
 
         // Store SVG data for download
         canvas.current.setAttribute("data-svg", svgData)
+
+        if (onDetailedSvgData && detailedSvgData) {
+          onDetailedSvgData(detailedSvgData)
+        }
       }
     }
-  }, [image, settings, ref])
+  }, [image, settings, ref, onDetailedSvgData])
 
   return <canvas ref={ref} className="w-full h-full" />
 })

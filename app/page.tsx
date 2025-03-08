@@ -7,6 +7,7 @@ import { Upload, Download, ImageIcon, Copy } from "lucide-react"
 import ImageProcessor from "@/components/image-processor"
 import ControlPanel from "@/components/control-panel"
 import { debounce } from "@/lib/debounce"
+import ExportSection from "@/components/ExportSection"
 
 type GradientPoint = "top" | "top-left" | "top-right" | "bottom" | "bottom-left" | "bottom-right" | "left" | "right"
 
@@ -25,6 +26,8 @@ export default function HalftoneConverter() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [svgData, setSvgData] = useState<string>('')
+  const [detailedSvgData, setDetailedSvgData] = useState<string>('')
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -80,6 +83,21 @@ export default function HalftoneConverter() {
     link.click()
   }
 
+  const downloadDetailedSVG = () => {
+    if (!detailedSvgData) {
+      alert('No detailed SVG data available')
+      return
+    }
+
+    const blob = new Blob([detailedSvgData], { type: 'image/svg+xml' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'halftone-detailed.svg'
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="container mx-auto p-4 min-h-screen">
       <Card className="p-6">
@@ -98,7 +116,7 @@ export default function HalftoneConverter() {
           <div className="grid md:grid-cols-[2fr,1fr] gap-6">
             <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
               {image ? (
-                <ImageProcessor ref={canvasRef} image={image} settings={settings} />
+                <ImageProcessor ref={canvasRef} image={image} settings={settings} onDetailedSvgData={setDetailedSvgData} />
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center text-gray-500">
@@ -122,12 +140,17 @@ export default function HalftoneConverter() {
                 <Download className="w-4 h-4 mr-2" />
                 Download SVG
               </Button>
+              <Button onClick={downloadDetailedSVG} variant="outline">
+                <Download className="w-4 h-4 mr-2" />
+                Download Detailed SVG
+              </Button>
               <Button onClick={copySVGCode} variant="outline">
                 <Copy className="w-4 h-4 mr-2" />
                 Copy SVG Code
               </Button>
             </div>
           )}
+
         </div>
       </Card>
     </div>
