@@ -3,6 +3,7 @@
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Play, Pause } from 'lucide-react';
+import { PresetsDropdown } from "@/components/svg-animator/PresetsDropdown";
 
 interface AnimationControlsProps {
   settings: {
@@ -21,8 +22,25 @@ export default function AnimationControls({ settings, onChange }: AnimationContr
     });
   };
 
+  const handlePresetSelect = (preset: string) => {
+    switch (preset) {
+      case "breathing":
+        onChange({ speed: 2, intensity: 0.5, isPlaying: true });
+        break;
+      case "wave":
+        onChange({ speed: 1.5, intensity: 0.7, isPlaying: true });
+        break;
+      case "pulse":
+        onChange({ speed: 1, intensity: 0.3, isPlaying: true });
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div className="space-y-6">
+      <PresetsDropdown onSelect={handlePresetSelect} />
       <div className="space-y-2">
         <label className="block text-sm font-medium">Speed ({settings.speed.toFixed(1)})</label>
         <Slider
