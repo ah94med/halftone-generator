@@ -7,7 +7,6 @@ import { Upload, Download, ImageIcon, Copy } from "lucide-react"
 import ImageProcessor from "@/components/image-processor"
 import ControlPanel from "@/components/control-panel"
 import { debounce } from "@/lib/debounce"
-import ExportSection from "@/components/ExportSection"
 
 type GradientPoint = "top" | "top-left" | "top-right" | "bottom" | "bottom-left" | "bottom-right" | "left" | "right"
 

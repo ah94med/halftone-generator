@@ -12,6 +12,9 @@ export const NavBar = () => {
           <Link href="/svg-merge" className="text-white hover:text-gray-300">
             SVG Merger
           </Link>
+          <Link href="/svg-animator" className="text-white hover:text-gray-300">
+            SVG Animator
+          </Link>
         </div>
       </div>
     </nav>
