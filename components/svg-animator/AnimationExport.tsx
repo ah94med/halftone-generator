@@ -11,7 +11,6 @@ interface AnimationExportProps {
     speed: number;
     intensity: number;
     isPlaying: boolean;
-    shapeEffect: string;
   };
 }
 
@@ -33,6 +32,13 @@ export default function AnimationExport({ svgData, settings }: AnimationExportPr
       // Add the <style> tag for animations
       const style = document.createElement('style');
       style.textContent = `
+        .animate-dots-breathing-rotate {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: breathing-rotate var(--animation-speed, 2s) ease-in-out infinite;
+          will-change: transform;
+        }
+
         .animate-dots-breathing {
           transform-box: fill-box;
           transform-origin: center;
@@ -40,7 +46,7 @@ export default function AnimationExport({ svgData, settings }: AnimationExportPr
           will-change: transform;
         }
 
-        @keyframes breathing {
+        @keyframes breathing-rotate {
           0%, 100% { 
             transform: rotate(45deg) scale(1); 
           }
@@ -48,13 +54,38 @@ export default function AnimationExport({ svgData, settings }: AnimationExportPr
             transform: rotate(45deg) scale(calc(1 + (0.1 * var(--animation-intensity, 0.2)))); 
           }
         }
+
+        @keyframes breathing {
+          0%, 100% { 
+            transform: scale(1); 
+          }
+          50% { 
+            transform: scale(calc(1 + (0.1 * var(--animation-intensity, 0.2)))); 
+          }
+        }
       `;
       svgElement.prepend(style);
 
-      // Apply animation classes to all rect elements
-      const rects = svgElement.querySelectorAll('rect');
-      rects.forEach((rect) => {
-        rect.classList.add('animate-dots-breathing');
+      // Process all elements and apply appropriate classes
+      const elements = svgElement.querySelectorAll('path, rect');
+      elements.forEach((element) => {
+        const el = element as HTMLElement;
+        const hasRotation = el.getAttribute('transform')?.includes('rotate') || 
+                          el.style.transform?.includes('rotate');
+
+        // Remove existing animation classes
+        el.classList.remove('animate-dots-breathing', 'animate-dots-breathing-rotate');
+
+        // Add appropriate animation class
+        if (hasRotation || element.tagName === 'rect') {
+          el.classList.add('animate-dots-breathing-rotate');
+        } else {
+          el.classList.add('animate-dots-breathing');
+        }
+
+        // Set animation properties
+        el.style.setProperty('--animation-speed', `${settings.speed}s`);
+        el.style.setProperty('--animation-intensity', `${settings.intensity}`);
       });
 
       // Serialize the modified SVG
@@ -85,30 +116,63 @@ export default function AnimationExport({ svgData, settings }: AnimationExportPr
     const svgElement = tempContainer.querySelector('svg');
 
     if (svgElement) {
-      // Apply animation classes and styles to the SVG elements
-      const dots = svgElement.querySelectorAll('path, rect');
-      dots.forEach((dot, index) => {
-        const element = dot as HTMLElement;
-
-        // Remove existing animation classes
-        element.classList.remove(
-          'animate-dots-breathing',
-          'animate-dots-wave',
-          'animate-dots-rotate',
-          'animate-dots-twist',
-          'animate-dots-skew'
-        );
-
-        // Apply selected effect
-        if (settings.shapeEffect === 'wave') {
-          element.classList.add('animate-dots-wave');
-        } else if (settings.shapeEffect === 'breathing') {
-          element.classList.add('animate-dots-breathing');
+      // Add the <style> tag for animations
+      const style = document.createElement('style');
+      style.textContent = `
+        .animate-dots-breathing-rotate {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: breathing-rotate var(--animation-speed, 2s) ease-in-out infinite;
+          will-change: transform;
         }
 
-        // Set animation speed and intensity
-        element.style.setProperty('--animation-speed', `${settings.speed}s`);
-        element.style.setProperty('--animation-intensity', `${settings.intensity}`);
+        .animate-dots-breathing {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: breathing var(--animation-speed, 2s) ease-in-out infinite;
+          will-change: transform;
+        }
+
+        @keyframes breathing-rotate {
+          0%, 100% { 
+            transform: rotate(45deg) scale(1); 
+          }
+          50% { 
+            transform: rotate(45deg) scale(calc(1 + (0.1 * var(--animation-intensity, 0.2)))); 
+          }
+        }
+
+        @keyframes breathing {
+          0%, 100% { 
+            transform: scale(1); 
+          }
+          50% { 
+            transform: scale(calc(1 + (0.1 * var(--animation-intensity, 0.2)))); 
+          }
+        }
+      `;
+      svgElement.prepend(style);
+
+      // Process all elements and apply appropriate classes
+      const elements = svgElement.querySelectorAll('path, rect');
+      elements.forEach((element) => {
+        const el = element as HTMLElement;
+        const hasRotation = el.getAttribute('transform')?.includes('rotate') || 
+                          el.style.transform?.includes('rotate');
+
+        // Remove existing animation classes
+        el.classList.remove('animate-dots-breathing', 'animate-dots-breathing-rotate');
+
+        // Add appropriate animation class
+        if (hasRotation || element.tagName === 'rect') {
+          el.classList.add('animate-dots-breathing-rotate');
+        } else {
+          el.classList.add('animate-dots-breathing');
+        }
+
+        // Set animation properties
+        el.style.setProperty('--animation-speed', `${settings.speed}s`);
+        el.style.setProperty('--animation-intensity', `${settings.intensity}`);
       });
 
       // Serialize the modified SVG

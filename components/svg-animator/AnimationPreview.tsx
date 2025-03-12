@@ -36,17 +36,21 @@ export default function AnimationPreview({ svgData, settings }: AnimationPreview
           console.log(`Processing dot ${index}`);
           const element = dot as HTMLElement;
           
-          // Get existing transform (rotation)
-          const existingTransform = element.getAttribute('transform') || '';
+          // Check if the element has a rotation transform
+          const hasRotation = element.getAttribute('transform')?.includes('rotate') || 
+                            element.style.transform?.includes('rotate');
           
-          // Add breathing animation
-          element.classList.add('animate-dots-breathing');
+          // Add appropriate animation class
+          if (hasRotation || element.tagName === 'rect') {
+            element.classList.add('animate-dots-breathing-rotate');
+          } else {
+            element.classList.add('animate-dots-breathing');
+          }
+          
+          // Set animation properties
           element.style.setProperty('--animation-speed', `${settings.speed}s`);
           element.style.setProperty('--animation-intensity', `${settings.intensity}`);
           element.style.setProperty('--index', `${index}`);
-          
-          // Preserve existing transform in the animation
-          element.style.transform = `${existingTransform}`;
           
           // Control animation play state
           if (settings.isPlaying) {
