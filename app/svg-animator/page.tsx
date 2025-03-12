@@ -44,7 +44,10 @@ export default function SvgAnimator() {
                 />
               </div>
               
-              <AnimationExport svgData={svgData} />
+              <AnimationExport 
+                svgData={svgData} 
+                settings={animationSettings} 
+              />
             </>
           )}
         </div>
