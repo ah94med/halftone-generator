@@ -18,8 +18,7 @@ export function PresetsDropdown({ onSelect }: PresetsDropdownProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem onClick={() => onSelect("breathing")}>Breathing</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onSelect("wave")}>Wave</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onSelect("pulse")}>Pulse</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onSelect("rotate")}>Rotation</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

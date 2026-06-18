@@ -13,6 +13,8 @@ export default function SvgAnimator() {
     speed: 1,
     intensity: 0.5,
     isPlaying: false,
+    animationType: 'scale',
+    rotationSpeed: 2
   });
 
   const handleUpload = async (files: File[]) => {

@@ -127,6 +127,46 @@ body {
   }
 }
 
+/* Rotation animation for elements with built-in rotation (rect) */
+@keyframes rotate-pause-45 {
+  0% {
+    transform: rotate(45deg);
+  }
+  80% {
+    transform: rotate(225deg);
+  }
+  100% {
+    transform: rotate(225deg);
+  }
+}
+
+/* Rotation animation for elements without built-in rotation (path) */
+@keyframes rotate-pause {
+  0% {
+    transform: rotate(0deg);
+  }
+  80% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-dots-rotate-45 {
+  animation: rotate-pause-45 var(--rotation-speed, 2s) linear infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+  will-change: transform;
+}
+
+.animate-dots-rotate {
+  animation: rotate-pause var(--rotation-speed, 2s) linear infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+  will-change: transform;
+}
+
 /* Remove other animation presets */
 .animate-dots-rotation,
 .animate-dots-wave,

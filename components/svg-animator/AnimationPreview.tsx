@@ -8,6 +8,8 @@ interface AnimationPreviewProps {
     speed: number;
     intensity: number;
     isPlaying: boolean;
+    animationType: string;
+    rotationSpeed: number;
   };
 }
 
@@ -31,33 +33,45 @@ export default function AnimationPreview({ svgData, settings }: AnimationPreview
         const dots = svgElement.querySelectorAll('path, rect');
         console.log(`Found ${dots.length} dots`);
         
-        // Apply animation properties to each dot
         dots.forEach((dot, index) => {
-          console.log(`Processing dot ${index}`);
           const element = dot as HTMLElement;
           
-          // Check if the element has a rotation transform
-          const hasRotation = element.getAttribute('transform')?.includes('rotate') || 
-                            element.style.transform?.includes('rotate');
-          
-          // Add appropriate animation class
-          if (hasRotation || element.tagName === 'rect') {
-            element.classList.add('animate-dots-breathing-rotate');
+          // Remove all animation classes
+          element.classList.remove(
+            'animate-dots-breathing',
+            'animate-dots-breathing-rotate',
+            'animate-dots-rotate',
+            'animate-dots-rotate-45'
+          );
+
+          // Apply new animation based on selected type
+          if (settings.animationType === 'rotate') {
+            // Apply appropriate rotation animation based on element type
+            if (element.tagName === 'rect') {
+              element.classList.add('animate-dots-rotate-45');
+            } else {
+              element.classList.add('animate-dots-rotate');
+            }
           } else {
-            element.classList.add('animate-dots-breathing');
+            // Apply breathing animation based on element type
+            const hasRotation = element.getAttribute('transform')?.includes('rotate') || 
+                              element.style.transform?.includes('rotate');
+            
+            if (hasRotation || element.tagName === 'rect') {
+              element.classList.add('animate-dots-breathing-rotate');
+            } else {
+              element.classList.add('animate-dots-breathing');
+            }
           }
-          
+
           // Set animation properties
           element.style.setProperty('--animation-speed', `${settings.speed}s`);
           element.style.setProperty('--animation-intensity', `${settings.intensity}`);
+          element.style.setProperty('--rotation-speed', `${settings.rotationSpeed || 2}s`);
           element.style.setProperty('--index', `${index}`);
           
           // Control animation play state
-          if (settings.isPlaying) {
-            element.style.animationPlayState = 'running';
-          } else {
-            element.style.animationPlayState = 'paused';
-          }
+          element.style.animationPlayState = settings.isPlaying ? 'running' : 'paused';
         });
       }
     }

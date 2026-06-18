@@ -11,6 +11,8 @@ interface AnimationExportProps {
     speed: number;
     intensity: number;
     isPlaying: boolean;
+    animationType: string;
+    rotationSpeed?: number;
   };
 }
 
@@ -23,7 +25,6 @@ export default function AnimationExport({ svgData, settings }: AnimationExportPr
       return;
     }
 
-    // Create a temporary container to parse the SVG
     const tempContainer = document.createElement('div');
     tempContainer.innerHTML = svgData;
     const svgElement = tempContainer.querySelector('svg');
@@ -63,29 +64,95 @@ export default function AnimationExport({ svgData, settings }: AnimationExportPr
             transform: scale(calc(1 + (0.1 * var(--animation-intensity, 0.2)))); 
           }
         }
+
+        @keyframes rotate-pause-45 {
+          0% {
+            transform: rotate(45deg);
+          }
+          80% {
+            transform: rotate(225deg);
+          }
+          100% {
+            transform: rotate(225deg);
+          }
+        }
+
+        @keyframes rotate-pause {
+          0% {
+            transform: rotate(0deg);
+          }
+          80% {
+            transform: rotate(360deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        .animate-dots-rotate-45 {
+          animation: rotate-pause-45 var(--rotation-speed, 2s) linear infinite;
+          transform-origin: center;
+          will-change: transform;
+        }
+
+        .animate-dots-rotate {
+          animation: rotate-pause var(--rotation-speed, 2s) linear infinite;
+          transform-origin: center;
+          will-change: transform;
+        }
+
+        .animate-dots-rotate.animate-dots-breathing-rotate {
+          animation: 
+            rotate-pause var(--rotation-speed, 2s) linear infinite,
+            breathing-rotate var(--animation-speed, 2s) ease-in-out infinite;
+        }
+
+        .animate-dots-rotate.animate-dots-breathing {
+          animation: 
+            rotate-pause var(--rotation-speed, 2s) linear infinite,
+            breathing var(--animation-speed, 2s) ease-in-out infinite;
+        }
       `;
       svgElement.prepend(style);
 
-      // Process all elements and apply appropriate classes
+      // Process all elements
       const elements = svgElement.querySelectorAll('path, rect');
       elements.forEach((element) => {
         const el = element as HTMLElement;
-        const hasRotation = el.getAttribute('transform')?.includes('rotate') || 
-                          el.style.transform?.includes('rotate');
-
+        
         // Remove existing animation classes
-        el.classList.remove('animate-dots-breathing', 'animate-dots-breathing-rotate');
+        el.classList.remove(
+          'animate-dots-breathing',
+          'animate-dots-breathing-rotate',
+          'animate-dots-rotate',
+          'animate-dots-rotate-45'
+        );
 
-        // Add appropriate animation class
-        if (hasRotation || element.tagName === 'rect') {
-          el.classList.add('animate-dots-breathing-rotate');
-        } else {
-          el.classList.add('animate-dots-breathing');
+        // Apply breathing animation
+        if (settings.animationType === 'scale') {
+          const hasRotation = el.getAttribute('transform')?.includes('rotate') || 
+                            el.style.transform?.includes('rotate');
+          
+          if (hasRotation || element.tagName === 'rect') {
+            el.classList.add('animate-dots-breathing-rotate');
+          } else {
+            el.classList.add('animate-dots-breathing');
+          }
+        }
+
+        // Apply rotation animation if selected
+        if (settings.animationType === 'rotate') {
+          if (element.tagName === 'rect') {
+            el.classList.add('animate-dots-rotate-45');
+          } else {
+            el.classList.add('animate-dots-rotate');
+          }
         }
 
         // Set animation properties
         el.style.setProperty('--animation-speed', `${settings.speed}s`);
         el.style.setProperty('--animation-intensity', `${settings.intensity}`);
+        el.style.setProperty('--rotation-speed', `${settings.rotationSpeed || 2}s`);
       });
 
       // Serialize the modified SVG
@@ -149,6 +216,54 @@ export default function AnimationExport({ svgData, settings }: AnimationExportPr
           50% { 
             transform: scale(calc(1 + (0.1 * var(--animation-intensity, 0.2)))); 
           }
+        }
+
+        @keyframes rotate-pause-45 {
+          0% {
+            transform: rotate(45deg);
+          }
+          80% {
+            transform: rotate(225deg);
+          }
+          100% {
+            transform: rotate(225deg);
+          }
+        }
+
+        @keyframes rotate-pause {
+          0% {
+            transform: rotate(0deg);
+          }
+          80% {
+            transform: rotate(360deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        .animate-dots-rotate-45 {
+          animation: rotate-pause-45 var(--rotation-speed, 2s) linear infinite;
+          transform-origin: center;
+          will-change: transform;
+        }
+
+        .animate-dots-rotate {
+          animation: rotate-pause var(--rotation-speed, 2s) linear infinite;
+          transform-origin: center;
+          will-change: transform;
+        }
+
+        .animate-dots-rotate.animate-dots-breathing-rotate {
+          animation: 
+            rotate-pause var(--rotation-speed, 2s) linear infinite,
+            breathing-rotate var(--animation-speed, 2s) ease-in-out infinite;
+        }
+
+        .animate-dots-rotate.animate-dots-breathing {
+          animation: 
+            rotate-pause var(--rotation-speed, 2s) linear infinite,
+            breathing var(--animation-speed, 2s) ease-in-out infinite;
         }
       `;
       svgElement.prepend(style);
