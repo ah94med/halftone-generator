@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { NavBar } from '@/components/NavBar'
+import { PostHogProvider } from '@/components/analytics/PostHogProvider'
 
 export const metadata: Metadata = {
   title: 'v0 App',
@@ -16,8 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <NavBar />
-        {children}
+        <PostHogProvider>
+          <NavBar />
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   )
