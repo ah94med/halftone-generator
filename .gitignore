@@ -3,6 +3,9 @@
 # dependencies
 /node_modules
 
+# Docs and helpers
+/docs
+
 # next.js
 /.next/
 /out/
